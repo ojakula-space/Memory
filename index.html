@@ -1,548 +1,1091 @@
 <!DOCTYPE html>
 <html lang="et">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0d0521">
-<title>Memory Lane ✨</title>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Memory Lane - Perekond Ojaküla</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-:root{
-  --purple:#8B5CF6;--pink:#EC4899;--amber:#F59E0B;
-  --teal:#14B8A6;--green:#10B981;--gold:#FFD700;
-  --blue:#60A5FA;--red:#EF4444;
-  --panel:rgba(255,255,255,0.06);--border:rgba(255,255,255,0.12);
-  --text:#fff;--muted:rgba(255,255,255,0.55);
-  --radius:16px;--r-card:14px;
-}
+        body {
+            min-height: 100vh;
+            background: #0a0a2a;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            touch-action: pan-x pan-y;
+        }
 
-html{height:100%;-webkit-tap-highlight-color:transparent;}
-body{
-  font-family:'Nunito',sans-serif;
-  background:#0d0521;color:var(--text);
-  min-height:100%;overflow-x:hidden;
-}
+        /* Animeeritud tähistaeva taust */
+        .stars-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+            overflow: hidden;
+        }
 
-/* ── CANVASES ── */
-#bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
-#confetti-canvas{position:fixed;inset:0;z-index:200;pointer-events:none;}
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            animation: starMove 200s linear infinite;
+        }
 
-/* ── SCREENS ── */
-.screen{
-  display:none;position:relative;z-index:1;
-  min-height:100vh;flex-direction:column;
-  align-items:center;justify-content:center;
-  padding:28px 16px 32px;
-}
-.screen.active{display:flex;}
+        .stars::before,
+        .stars::after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 90px 40px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 160px 120px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 230px 80px, #ffd, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 300px 150px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 400px 30px, #ffe, rgba(0,0,0,0)),
+                radial-gradient(3px 3px at 500px 200px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 600px 50px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 700px 180px, #ffd, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 800px 90px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 900px 160px, #ffe, rgba(0,0,0,0)),
+                radial-gradient(3px 3px at 1000px 40px, #fff, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 250px 250px;
+            opacity: 0.8;
+        }
 
-/* ── MENU ── */
-.logo{
-  font-family:'Fredoka One',cursive;
-  font-size:clamp(3.2rem,12vw,6rem);
-  line-height:.95;text-align:center;
-  background:linear-gradient(135deg,#FFD700 0%,#FF6B6B 40%,#a78bfa 80%);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  margin-bottom:4px;
-  filter:drop-shadow(0 0 40px rgba(139,92,246,.4));
-}
-.logo-sub{
-  font-size:1rem;color:var(--muted);text-align:center;
-  letter-spacing:3px;text-transform:uppercase;font-weight:700;
-  margin-bottom:48px;
-}
-.btn-play{
-  background:linear-gradient(135deg,#7C3AED,#EC4899);
-  color:#fff;border:none;padding:18px 52px;border-radius:60px;
-  font-family:'Fredoka One',cursive;font-size:1.5rem;cursor:pointer;
-  box-shadow:0 8px 32px rgba(124,58,237,.55);
-  transition:transform .2s,box-shadow .2s;
-  margin-bottom:14px;width:100%;max-width:280px;
-}
-.btn-play:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(124,58,237,.7);}
-.btn-play:active{transform:translateY(0);}
-.btn-ghost{
-  background:var(--panel);border:1px solid var(--border);color:var(--muted);
-  padding:12px 32px;border-radius:60px;
-  font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;
-  transition:all .2s;width:100%;max-width:280px;
-}
-.btn-ghost:hover{background:rgba(255,255,255,.12);color:#fff;}
+        .stars::after {
+            background-size: 400px 400px;
+            opacity: 0.5;
+            animation: twinkle 4s ease-in-out infinite alternate;
+        }
 
-.menu-stats{
-  display:flex;gap:28px;margin-top:36px;
-  background:var(--panel);border:1px solid var(--border);
-  border-radius:var(--radius);padding:16px 28px;
-}
-.menu-stat{text-align:center;}
-.menu-stat-val{
-  font-family:'Fredoka One',cursive;font-size:1.8rem;
-  color:var(--gold);line-height:1;
-}
-.menu-stat-lbl{font-size:.7rem;color:var(--muted);font-weight:700;text-transform:uppercase;margin-top:2px;}
+        @keyframes starMove {
+            from { transform: translateY(0); }
+            to { transform: translateY(-2000px); }
+        }
 
-/* ── SHARED SECTION TITLES ── */
-.stitle{
-  font-family:'Fredoka One',cursive;
-  font-size:clamp(1.7rem,5vw,2.4rem);
-  text-align:center;margin-bottom:6px;
-}
-.ssub{font-size:.95rem;color:var(--muted);text-align:center;margin-bottom:28px;}
+        @keyframes twinkle {
+            0% { opacity: 0.3; }
+            100% { opacity: 0.7; }
+        }
 
-/* ── BACK BUTTON (top-left) ── */
-.back-btn{
-  position:absolute;top:18px;left:16px;
-  background:var(--panel);border:1px solid var(--border);
-  color:#fff;padding:8px 18px;border-radius:50px;cursor:pointer;
-  font-family:'Nunito',sans-serif;font-weight:800;font-size:.9rem;
-  transition:all .2s;display:flex;align-items:center;gap:5px;
-}
-.back-btn:hover{background:rgba(255,255,255,.14);}
+        .game-container {
+            position: relative;
+            z-index: 10;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
 
-/* ── DIFFICULTY CARDS ── */
-.diff-grid{
-  display:grid;grid-template-columns:repeat(2,1fr);
-  gap:14px;width:100%;max-width:480px;
-}
-.diff-card{
-  background:var(--panel);border:2px solid var(--border);
-  border-radius:var(--radius);padding:22px 14px 18px;
-  text-align:center;cursor:pointer;
-  transition:transform .25s,box-shadow .25s,border-color .25s;
-  position:relative;overflow:hidden;
-}
-.diff-card::before{
-  content:'';position:absolute;inset:0;
-  background:var(--glow,transparent);opacity:0;transition:opacity .25s;
-}
-.diff-card:hover{transform:translateY(-5px);}
-.diff-card:hover::before{opacity:1;}
-.diff-card:active{transform:translateY(-2px);}
-.dc-easy  {--glow:linear-gradient(135deg,rgba(16,185,129,.18),transparent);}
-.dc-easy:hover  {box-shadow:0 8px 28px rgba(16,185,129,.35);border-color:#10B981;}
-.dc-med   {--glow:linear-gradient(135deg,rgba(96,165,250,.18),transparent);}
-.dc-med:hover   {box-shadow:0 8px 28px rgba(96,165,250,.35);border-color:#60A5FA;}
-.dc-hard  {--glow:linear-gradient(135deg,rgba(245,158,11,.18),transparent);}
-.dc-hard:hover  {box-shadow:0 8px 28px rgba(245,158,11,.35);border-color:#F59E0B;}
-.dc-expert{--glow:linear-gradient(135deg,rgba(236,72,153,.18),transparent);}
-.dc-expert:hover{box-shadow:0 8px 28px rgba(236,72,153,.35);border-color:#EC4899;}
-.dc-icon{font-size:2.4rem;margin-bottom:6px;}
-.dc-name{font-family:'Fredoka One',cursive;font-size:1.25rem;margin-bottom:2px;}
-.dc-info{font-size:.75rem;color:var(--muted);}
-.dc-badge{
-  display:inline-block;padding:2px 10px;border-radius:20px;
-  font-size:.68rem;font-weight:800;margin-top:8px;
-}
-.dc-easy   .dc-badge{background:rgba(16,185,129,.18);color:#10B981;}
-.dc-med    .dc-badge{background:rgba(96,165,250,.18);color:#60A5FA;}
-.dc-hard   .dc-badge{background:rgba(245,158,11,.18);color:#F59E0B;}
-.dc-expert .dc-badge{background:rgba(236,72,153,.18);color:#EC4899;}
-.dc-progress{font-size:.7rem;color:var(--muted);margin-top:6px;}
+        /* Peamenüü */
+        .menu-screen, .game-screen, .level-select, .win-screen {
+            background: rgba(20, 30, 50, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 25px 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 2px 5px rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+        }
 
-/* ── LEVEL SELECT ── */
-.lev-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
-  gap:12px;width:100%;max-width:480px;
-}
-.lev-card{
-  background:var(--panel);border:2px solid var(--border);
-  border-radius:var(--radius);padding:18px 10px 14px;
-  text-align:center;cursor:pointer;
-  transition:transform .2s,box-shadow .2s,border-color .2s;
-}
-.lev-card:hover{
-  transform:translateY(-4px);
-  box-shadow:0 8px 24px rgba(139,92,246,.4);
-  border-color:var(--purple);
-}
-.lev-card:active{transform:translateY(-1px);}
-.lev-num{
-  font-family:'Fredoka One',cursive;font-size:2rem;
-  color:var(--purple);line-height:1;margin-bottom:2px;
-}
-.lev-icon{font-size:1.6rem;margin-bottom:4px;}
-.lev-name{font-size:.7rem;color:var(--muted);font-weight:700;margin-bottom:8px;}
-.lev-stars{display:flex;justify-content:center;gap:2px;font-size:.95rem;}
-.star-on{color:var(--gold);filter:drop-shadow(0 0 3px gold);}
-.star-off{color:rgba(255,255,255,.18);}
+        .screen-title {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #6eb5ff, 0 0 40px #4a90e2;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
 
-.stars-total{
-  display:flex;align-items:center;gap:8px;
-  font-family:'Fredoka One',cursive;font-size:1.1rem;
-  color:var(--gold);margin-bottom:18px;
-}
+        .subtitle {
+            text-align: center;
+            margin-bottom: 25px;
+            opacity: 0.9;
+            font-style: italic;
+        }
 
-/* ── GAME SCREEN ── */
-#screen-game{
-  padding:0;justify-content:flex-start;
-  height:100vh;min-height:unset;overflow:hidden;
-}
-.game-wrap{
-  width:100%;height:100vh;
-  display:flex;flex-direction:column;
-  max-width:680px;margin:0 auto;
-}
-.game-hdr{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 14px;
-  background:rgba(13,5,33,.85);
-  border-bottom:1px solid var(--border);
-  backdrop-filter:blur(12px);
-  flex-shrink:0;
-}
-.game-hdr-back{
-  background:var(--panel);border:1px solid var(--border);
-  color:#fff;width:36px;height:36px;border-radius:10px;
-  cursor:pointer;font-size:1.1rem;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-  transition:background .2s;
-}
-.game-hdr-back:hover{background:rgba(255,255,255,.14);}
-.game-hdr-info{flex:1;text-align:center;min-width:0;}
-.game-hdr-lbl{font-size:.6rem;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:1px;}
-.game-hdr-name{font-family:'Fredoka One',cursive;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.game-stats{display:flex;gap:14px;flex-shrink:0;}
-.gstat{text-align:center;}
-.gstat-ico{font-size:.8rem;}
-.gstat-val{font-family:'Fredoka One',cursive;font-size:1.05rem;line-height:1;}
+        /* Raskusastme nupud */
+        .difficulty-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
 
-.progress-bar{height:4px;background:rgba(255,255,255,.08);flex-shrink:0;}
-.progress-fill{
-  height:100%;width:0%;
-  background:linear-gradient(90deg,#7C3AED,#EC4899);
-  transition:width .5s ease;border-radius:0 2px 2px 0;
-}
+        .difficulty-btn {
+            background: linear-gradient(145deg, #2a3a55, #1a2a45);
+            border: 2px solid #4a7ab5;
+            color: white;
+            padding: 18px 10px;
+            border-radius: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 0 #0f1a2a, 0 4px 15px rgba(0,0,0,0.3);
+            text-align: center;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
 
-.board-wrap{
-  flex:1;min-height:0;
-  padding:10px;
-  display:flex;align-items:center;justify-content:center;
-}
-.board{
-  display:grid;
-  gap:clamp(4px,1.2vw,9px);
-  width:100%;height:100%;
-}
+        .difficulty-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #0f1a2a, 0 4px 15px rgba(0,0,0,0.3);
+        }
 
-/* ── CARD ── */
-.card{cursor:pointer;perspective:700px;}
-.card-inner{
-  width:100%;height:100%;position:relative;
-  transform-style:preserve-3d;
-  transition:transform .42s cubic-bezier(.4,0,.2,1);
-  border-radius:var(--r-card);
-}
-.card.flipped .card-inner,
-.card.matched .card-inner{transform:rotateY(180deg);}
-.card-front,.card-back{
-  position:absolute;inset:0;
-  border-radius:var(--r-card);
-  backface-visibility:hidden;
-  -webkit-backface-visibility:hidden;
-  display:flex;align-items:center;justify-content:center;
-}
-.card-front{
-  background:linear-gradient(135deg,#4C1D95,#6D28D9,#7C3AED);
-  border:2px solid rgba(167,139,250,.35);
-  box-shadow:0 4px 16px rgba(76,29,149,.5),inset 0 0 30px rgba(124,58,237,.25);
-  overflow:hidden;
-}
-.card-front-deco{
-  position:absolute;inset:0;
-  display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
-  font-size:clamp(.55rem,1.5vw,.85rem);
-  color:rgba(167,139,250,.35);
-  letter-spacing:-1px;
-  pointer-events:none;
-  user-select:none;
-  line-height:1.2;
-  padding:4px;
-}
-.card-back{
-  background:#fff;transform:rotateY(180deg);
-  border:2px solid rgba(255,255,255,.8);
-  box-shadow:0 4px 16px rgba(0,0,0,.18);
-  font-size:clamp(1.4rem,4vw,2.6rem);
-}
-.card.matched .card-back{
-  background:linear-gradient(135deg,#d1fae5,#a7f3d0);
-  border-color:#10B981;
-  box-shadow:0 0 22px rgba(16,185,129,.55);
-  animation:matchPop .4s ease;
-}
-@keyframes matchPop{
-  0%{transform:rotateY(180deg) scale(1);}
-  40%{transform:rotateY(180deg) scale(1.14);}
-  100%{transform:rotateY(180deg) scale(1);}
-}
-.card.shake .card-inner{animation:shakeCard .38s ease;}
-@keyframes shakeCard{
-  0%,100%{transform:rotateY(180deg);}
-  25%{transform:rotateY(180deg) translateX(-5px);}
-  75%{transform:rotateY(180deg) translateX(5px);}
-}
+        .difficulty-btn small {
+            display: block;
+            font-size: 0.75em;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
 
-/* Hint row */
-.hint-row{
-  flex-shrink:0;padding:8px 14px;
-  display:flex;align-items:center;justify-content:space-between;
-  background:rgba(13,5,33,.5);
-  border-top:1px solid var(--border);
-}
-.hint-btn{
-  background:rgba(245,158,11,.15);
-  border:1px solid rgba(245,158,11,.4);
-  color:#F59E0B;
-  padding:7px 16px;border-radius:50px;
-  font-family:'Nunito',sans-serif;font-weight:800;font-size:.82rem;
-  cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;
-}
-.hint-btn:hover{background:rgba(245,158,11,.28);}
-.hint-btn:disabled{opacity:.3;cursor:not-allowed;}
-.pairs-label{
-  font-family:'Fredoka One',cursive;font-size:.95rem;color:var(--muted);
-}
-.pairs-val{color:#fff;}
+        /* Taseme valik */
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+        }
 
-/* ── COMPLETE SCREEN ── */
-.comp-emoji{
-  font-size:4.5rem;margin-bottom:12px;
-  animation:bounceIn .5s cubic-bezier(.34,1.56,.64,1);
-}
-@keyframes bounceIn{from{transform:scale(0);}to{transform:scale(1);}}
-.comp-title{
-  font-family:'Fredoka One',cursive;
-  font-size:clamp(2rem,6vw,3rem);margin-bottom:6px;
-  background:linear-gradient(135deg,#FFD700,#FF6B6B);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-}
-.new-rec{
-  background:linear-gradient(135deg,#FFD700,#FF6B6B);
-  color:#000;font-weight:800;font-size:.75rem;
-  padding:3px 12px;border-radius:20px;margin-bottom:8px;
-  display:none;
-}
-.new-rec.show{display:inline-block;animation:popIn .45s cubic-bezier(.34,1.56,.64,1);}
-@keyframes popIn{from{transform:scale(0);}to{transform:scale(1);}}
-.comp-stars{
-  display:flex;justify-content:center;gap:8px;
-  font-size:clamp(2rem,7vw,3.2rem);margin:12px 0;
-}
-.cstar{opacity:0;transform:scale(0) rotate(-30deg);transition:all .4s cubic-bezier(.34,1.56,.64,1);}
-.cstar.show{opacity:1;transform:scale(1) rotate(0);}
-.cstar.on{color:var(--gold);filter:drop-shadow(0 0 8px gold);}
-.cstar.off{color:rgba(255,255,255,.18);}
-.comp-stats{
-  display:flex;gap:20px;
-  background:var(--panel);border:1px solid var(--border);
-  border-radius:var(--radius);padding:14px 28px;margin:12px 0 22px;
-}
-.cstat{text-align:center;}
-.cstat-lbl{font-size:.68rem;color:var(--muted);font-weight:800;text-transform:uppercase;}
-.cstat-val{font-family:'Fredoka One',cursive;font-size:1.5rem;}
-.comp-btns{display:flex;flex-direction:column;gap:10px;width:100%;max-width:280px;}
-.btn{
-  border:none;cursor:pointer;border-radius:50px;
-  font-family:'Fredoka One',cursive;font-size:1.05rem;
-  padding:14px 28px;transition:all .2s;width:100%;
-}
-.btn-main{background:linear-gradient(135deg,#7C3AED,#EC4899);color:#fff;box-shadow:0 4px 20px rgba(124,58,237,.4);}
-.btn-main:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(124,58,237,.6);}
-.btn-sec{background:var(--panel);border:1px solid var(--border);color:#fff;}
-.btn-sec:hover{background:rgba(255,255,255,.14);}
+        .theme-btn {
+            background: linear-gradient(145deg, #34495e, #2c3e50);
+            border: 2px solid #5dade2;
+            color: white;
+            padding: 15px;
+            border-radius: 18px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #1a252f;
+            transition: all 0.2s;
+            text-align: center;
+            position: relative;
+        }
 
-/* ── VICTORY SCREEN ── */
-.victory-ring{
-  font-size:3rem;text-align:center;margin-bottom:12px;
-  animation:rock 1.8s ease-in-out infinite;
-}
-@keyframes rock{0%,100%{transform:rotate(-6deg);}50%{transform:rotate(6deg);}}
-.victory-title{
-  font-family:'Fredoka One',cursive;
-  font-size:clamp(2.8rem,9vw,4.5rem);
-  text-align:center;
-  background:linear-gradient(135deg,#FFD700,#FF6B6B,#a78bfa);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  margin-bottom:4px;
-}
+        .theme-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #1a252f;
+        }
 
-/* ── HOW TO PLAY MODAL ── */
-.modal-bg{
-  position:fixed;inset:0;background:rgba(0,0,0,.82);
-  z-index:150;display:none;align-items:center;justify-content:center;
-  padding:20px;backdrop-filter:blur(6px);
-}
-.modal-bg.open{display:flex;}
-.modal{
-  background:#130828;border:1px solid var(--border);
-  border-radius:20px;padding:28px 22px;
-  max-width:400px;width:100%;position:relative;
-  animation:slideUp .35s ease;
-}
-@keyframes slideUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
-.modal-title{
-  font-family:'Fredoka One',cursive;font-size:1.7rem;
-  text-align:center;margin-bottom:20px;
-}
-.modal-step{display:flex;gap:12px;margin-bottom:14px;align-items:flex-start;}
-.mstep-num{
-  width:26px;height:26px;flex-shrink:0;
-  background:linear-gradient(135deg,#7C3AED,#EC4899);
-  border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-weight:800;font-size:.8rem;
-}
-.mstep-txt{font-size:.9rem;color:rgba(255,255,255,.85);line-height:1.5;}
-.modal-close{
-  position:absolute;top:14px;right:14px;
-  background:var(--panel);border:1px solid var(--border);
-  color:#fff;width:30px;height:30px;border-radius:50%;
-  cursor:pointer;font-size:.9rem;
-  display:flex;align-items:center;justify-content:center;
-}
+        .theme-btn.locked {
+            opacity: 0.5;
+            filter: grayscale(0.7);
+            pointer-events: none;
+        }
 
-/* ── RESPONSIVE ── */
-@media(max-width:420px){
-  .diff-grid{gap:10px;}
-  .lev-grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;}
-  .comp-stats{padding:12px 18px;gap:14px;}
-  .menu-stats{padding:14px 18px;gap:18px;}
-}
-@media(min-width:600px){
-  .card-back{font-size:clamp(2rem,4.5vw,3rem);}
-}
+        .stars-earned {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 8px;
+        }
 
-/* ── TRANSITIONS ── */
-.screen.active{animation:fadeUp .35s ease;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-</style>
+        .star-icon {
+            color: #ffd700;
+            font-size: 1.2em;
+            text-shadow: 0 0 8px #ffd700;
+        }
+
+        .star-icon.empty {
+            color: #555;
+            text-shadow: none;
+        }
+
+        /* Mängu ekraan */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 5px;
+        }
+
+        .game-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 1.3em;
+        }
+
+        .hint-btn {
+            background: linear-gradient(145deg, #e67e22, #d35400);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #a04000;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hint-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #a04000;
+        }
+
+        .hint-btn.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 50px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        /* Kaardivõrk */
+        .cards-grid {
+            display: grid;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+            perspective: 1200px;
+        }
+
+        .card {
+            aspect-ratio: 1 / 1;
+            background: transparent;
+            cursor: pointer;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            border-radius: 15px;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card.matched {
+            pointer-events: none;
+        }
+
+        .card.matched .card-front {
+            opacity: 0.7;
+            filter: brightness(0.7);
+        }
+
+        .card.shake {
+            animation: shakeEffect 0.4s ease-in-out;
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.2), 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .card-front {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            transform: rotateY(180deg);
+            border: 3px solid #ffd700;
+        }
+
+        .card-back {
+            background: linear-gradient(145deg, #3498db, #2980b9);
+            border: 3px solid #5dade2;
+            background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 5px, transparent 5px, transparent 10px);
+        }
+
+        .card-back::after {
+            content: "?";
+            color: rgba(255,255,255,0.5);
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        @keyframes shakeEffect {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-10px); }
+            40% { transform: translateX(10px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(5px); }
+        }
+
+        /* Konfeti konteiner */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* Võidu ekraan */
+        .win-screen {
+            text-align: center;
+            padding: 40px 30px;
+        }
+
+        .trophy {
+            font-size: 5em;
+            margin: 20px 0;
+            animation: bounce 1s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-20px); }
+        }
+
+        .author-credit {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            font-size: 1.2em;
+            color: #a8d8ea;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(145deg, #2ecc71, #27ae60);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #1e8449;
+            transition: all 0.2s;
+            border: 1px solid #58d68d;
+        }
+
+        .btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 3px 0 #1e8449;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(145deg, #95a5a6, #7f8c8d);
+            box-shadow: 0 6px 0 #5d6d7e;
+        }
+
+        /* Responsiivne */
+        @media (max-width: 600px) {
+            .screen-title {
+                font-size: 2em;
+            }
+            .difficulty-btn {
+                padding: 12px 5px;
+                font-size: 1em;
+            }
+            .theme-btn {
+                padding: 12px;
+                font-size: 0.9em;
+            }
+            .card-front, .card-back {
+                font-size: 1.8em;
+            }
+            .game-stats {
+                font-size: 1.1em;
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .cards-grid {
+                gap: 6px;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="stars-bg">
+        <div class="stars"></div>
+    </div>
+    <canvas id="confetti-canvas"></canvas>
 
-<canvas id="bg-canvas"></canvas>
-<canvas id="confetti-canvas"></canvas>
-
-<!-- HOW TO PLAY MODAL -->
-<div class="modal-bg" id="modal-howto">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal()">✕</button>
-    <div class="modal-title">Kuidas mängida? 🎮</div>
-    <div class="modal-step">
-      <div class="mstep-num">1</div>
-      <div class="mstep-txt">Vali raskusaste — <b>Kerge</b> algajatele kuni <b>Ekspert</b> meistritele!</div>
-    </div>
-    <div class="modal-step">
-      <div class="mstep-num">2</div>
-      <div class="mstep-txt">Klõpsa kaardil et see ümber pöörata ja pilt näha.</div>
-    </div>
-    <div class="modal-step">
-      <div class="mstep-num">3</div>
-      <div class="mstep-txt">Pööra teine kaart — kui mõlemad pildid on samad, said paari! 🎉</div>
-    </div>
-    <div class="modal-step">
-      <div class="mstep-num">4</div>
-      <div class="mstep-txt">Leia kõik paarid <b>võimalikult väheste käikudega</b> — rohkem tähti! ⭐⭐⭐</div>
-    </div>
-    <div class="modal-step">
-      <div class="mstep-num">5</div>
-      <div class="mstep-txt">Kasuta <b>💡 Vihjet</b> kui jääd hätta — sul on 3 vihjet taseme kohta.</div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ MENU ══ -->
-<div class="screen active" id="screen-menu">
-  <div class="logo">Memory<br>Lane</div>
-  <div class="logo-sub">✦ leia kõik paarid ✦</div>
-  <button class="btn-play" onclick="nav('difficulty')">🎮 Mängi</button>
-  <button class="btn-ghost" onclick="openModal()">❓ Kuidas mängida</button>
-  <div class="menu-stats">
-    <div class="menu-stat">
-      <div class="menu-stat-val" id="ms-stars">0</div>
-      <div class="menu-stat-lbl">⭐ Tähte</div>
-    </div>
-    <div class="menu-stat">
-      <div class="menu-stat-val" id="ms-levels">0</div>
-      <div class="menu-stat-lbl">🏆 Taset</div>
-    </div>
-    <div class="menu-stat">
-      <div class="menu-stat-val" id="ms-perfect">0</div>
-      <div class="menu-stat-lbl">💎 Täiuslik</div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ DIFFICULTY ══ -->
-<div class="screen" id="screen-difficulty">
-  <button class="back-btn" onclick="nav('menu')">← Tagasi</button>
-  <div class="stitle">Vali raskusaste 🎯</div>
-  <div class="ssub">Mida raskem, seda rohkem kaarte!</div>
-  <div class="diff-grid">
-    <div class="diff-card dc-easy" onclick="pickDiff('easy')">
-      <div class="dc-icon">🌱</div>
-      <div class="dc-name">Kerge</div>
-      <div class="dc-info">6 paari · 3×4</div>
-      <div class="dc-badge">ALGAJA</div>
-      <div class="dc-progress" id="dp-easy">⭐ 0 / 15</div>
-    </div>
-    <div class="diff-card dc-med" onclick="pickDiff('medium')">
-      <div class="dc-icon">🌿</div>
-      <div class="dc-name">Keskmine</div>
-      <div class="dc-info">8 paari · 4×4</div>
-      <div class="dc-badge">MÄNGIJA</div>
-      <div class="dc-progress" id="dp-medium">⭐ 0 / 15</div>
-    </div>
-    <div class="diff-card dc-hard" onclick="pickDiff('hard')">
-      <div class="dc-icon">🔥</div>
-      <div class="dc-name">Raske</div>
-      <div class="dc-info">10 paari · 4×5</div>
-      <div class="dc-badge">MEISTER</div>
-      <div class="dc-progress" id="dp-hard">⭐ 0 / 15</div>
-    </div>
-    <div class="diff-card dc-expert" onclick="pickDiff('expert')">
-      <div class="dc-icon">💎</div>
-      <div class="dc-name">Ekspert</div>
-      <div class="dc-info">15 paari · 5×6</div>
-      <div class="dc-badge">LEGEND</div>
-      <div class="dc-progress" id="dp-expert">⭐ 0 / 15</div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ LEVEL SELECT ══ -->
-<div class="screen" id="screen-levels">
-  <button class="back-btn" onclick="nav('difficulty')">← Tagasi</button>
-  <div class="stitle" id="lev-title">Vali tase</div>
-  <div class="stars-total"><span>⭐</span><span id="lev-stars-txt">0 / 15 tähte</span></div>
-  <div class="lev-grid" id="lev-grid"></div>
-</div>
-
-<!-- ══ GAME ══ -->
-<div class="screen" id="screen-game">
-  <div class="game-wrap">
-    <div class="game-hdr">
-      <button class="game-hdr-back" onclick="confirmQuit()">←</button>
-      <div class="game-hdr-info">
-        <div class="game-hdr-lbl" id="g-lbl">TASE 1</div>
-        <div class="game-hdr-name" id="g-name">Loomad 🐾</div>
-      </div>
-      <div class="game-stats">
-        <div class="gstat">
-          <div class="gstat-ico">⏱️</div>
-          <div class="gstat-val" id="g-time">0:00</div>
+    <div class="game-container">
+        <!-- Peamenüü -->
+        <div id="menuScreen" class="menu-screen">
+            <h1 class="screen-title">🎮 MEMORY LANE</h1>
+            <p class="subtitle">Leia kõik paarid!</p>
+            <div class="difficulty-grid">
+                <div class="difficulty-btn" data-diff="easy">
+                    🌱 KERGE<br><small>3x4 (6 paari)</small>
+                </div>
+                <div class="difficulty-btn" data-diff="medium">
+                    🌿 KESKMINE<br><small>4x4 (8 paari)</small>
+                </div>
+                <div class="difficulty-btn" data-diff="hard">
+                    🔥 RASKE<br><small>4x5 (10 paari)</small>
+                </div>
+                <div class="difficulty-btn" data-diff="expert">
+                    ⭐ EKSPERT<br><small>5x6 (15 paari)</small>
+                </div>
+            </div>
+            <div class="author-credit">
+                👨‍👩‍👧‍👦 Perekond Ojaküla
+            </div>
         </div>
-        <div class="gstat">
-          <div class="gstat-ico">🎯</div>
-          <div class="gstat-val" id="g-moves">0</div>
+
+        <!-- Taseme valik -->
+        <div id="levelSelect" class="level-select hidden">
+            <h2 class="screen-title" id="difficultyTitle">Vali teema</h2>
+            <div id="themeGrid" class="theme-grid"></div>
+            <div class="action-buttons">
+                <button class="btn btn-secondary" id="backToMenuBtn">← Tagasi</button>
+            </div>
         </div>
-      </div>
+
+        <!-- Mängu ekraan -->
+        <div id="gameScreen" class="game-screen hidden">
+            <div class="game-header">
+                <button class="back-btn" id="gameBackBtn">← Menüü</button>
+                <div class="game-stats">
+                    <span>⭐ <span id="starDisplay">3</span></span>
+                    <span>🔄 <span id="movesDisplay">0</span></span>
+                </div>
+                <button class="hint-btn" id="hintBtn">
+                    💡 <span id="hintsLeft">3</span>
+                </button>
+            </div>
+            <div id="cardsContainer" class="cards-grid"></div>
+        </div>
+
+        <!-- Võidu ekraan -->
+        <div id="winScreen" class="win-screen hidden">
+            <h2 class="screen-title">🏆 VÕIT!</h2>
+            <div class="trophy">🏆</div>
+            <p style="font-size: 1.3em; margin: 20px 0;">
+                Palju õnne! Kõik 5 taset läbitud!
+            </p>
+            <div id="finalStars" style="font-size: 2em; margin: 20px 0;"></div>
+            <button class="btn" id="playAgainBtn">Mängi uuesti</button>
+            <div class="author-credit">
+                👨‍👩‍👧‍👦 Perekond Ojaküla
+            </div>
+        </div>
     </div>
-    <div class="progress-bar"><div class="progress-fill" id="g-prog"></div></div>
-    <div class="board-wrap">
-      <div class="board" id="game-board"></div>
-    </div>
-    <div class="hint-row">
-      <div class="pairs-label">Paarid: <span class="pairs-val" id="g-pairs">0/0</span></div>
-      <button class
+
+    <script>
+        (function(){
+            "use strict";
+
+            // ==================== MÄNGU SEADED ====================
+            const DIFFICULTIES = {
+                easy: { rows: 3, cols: 4, name: 'KERGE' },
+                medium: { rows: 4, cols: 4, name: 'KESKMINE' },
+                hard: { rows: 4, cols: 5, name: 'RASKE' },
+                expert: { rows: 5, cols: 6, name: 'EKSPERT' }
+            };
+
+            const THEMES = [
+                'Loomad', 'Puuviljad', 'Loodus', 'Meri', 'Maagia',
+                'Toit', 'Sport', 'Kosmos', 'Ookean', 'Linnud',
+                'Sõidukid', 'Muusika'
+            ];
+
+            // Ikoonid teemade kaupa
+            const THEME_ICONS = {
+                'Loomad': ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐸','🐵','🐔','🐧'],
+                'Puuviljad': ['🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🫐','🍒','🍑','🥭','🍍','🥥','🥝','🍅'],
+                'Loodus': ['🌲','🌳','🌴','🌵','🌾','🌿','🍀','🍁','🍂','🌺','🌻','🌼','🌸','💐','🌹','☀️'],
+                'Meri': ['🐟','🐠','🐡','🦐','🦑','🐙','🦀','🐬','🐳','🐋','🦈','🐚','🐠','🧜','⚓','🌊'],
+                'Maagia': ['✨','🔮','⚡','🌟','💫','⭐','🌙','☄️','🪄','🧙','🧚','🦄','🐉','🎆','🧿','💎'],
+                'Toit': ['🍕','🍔','🌭','🍿','🥨','🍦','🍩','🍪','🎂','🍫','🍬','🥗','🌮','🥙','🍣','☕'],
+                'Sport': ['⚽','🏀','🏈','⚾','🥎','🎾','🏐','🏉','🥏','🎱','🏓','🏸','🏒','🏑','🥍','🏹'],
+                'Kosmos': ['🌍','🌎','🌏','🌕','🌖','🌗','🌘','🌑','🌒','🌓','🌔','☀️','⭐','🌟','☄️','🚀'],
+                'Ookean': ['🐠','🐟','🐡','🐙','🪸','🐋','🦈','🦭','🐚','🌊','🏝️','⛵','🛶','🧜‍♀️','🐬','🪼'],
+                'Linnud': ['🦅','🦆','🦉','🐦','🐧','🐔','🐓','🦃','🕊️','🦜','🦚','🐦‍⬛','🪿','🦢','🐤','🐣'],
+                'Sõidukid': ['🚗','🚕','🚙','🚌','🚎','🏎️','🚓','🚑','🚒','🚐','🛻','🚚','🚛','🚜','🏍️','✈️'],
+                'Muusika': ['🎵','🎶','🎷','🎸','🎹','🎺','🎻','🪕','🥁','🎤','🎧','📻','🎼','🎬','🎭','🎨']
+            };
+
+            // ==================== HELIEFEKTID (Web Audio API) ====================
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            let audioCtx = null;
+
+            function initAudio() {
+                if (audioCtx) return;
+                audioCtx = new AudioContext();
+            }
+
+            function playSound(type) {
+                if (!audioCtx) initAudio();
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                switch(type) {
+                    case 'match':
+                        osc.frequency.value = 880;
+                        gain.gain.setValueAtTime(0.15, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                        osc.start();
+                        osc.stop(now + 0.2);
+                        break;
+                    case 'wrong':
+                        osc.frequency.value = 220;
+                        gain.gain.setValueAtTime(0.15, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                        osc.start();
+                        osc.stop(now + 0.3);
+                        break;
+                    case 'levelComplete':
+                        osc.frequency.value = 523;
+                        gain.gain.setValueAtTime(0.1, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                        osc.start();
+                        osc.stop(now + 0.4);
+                        
+                        const osc2 = audioCtx.createOscillator();
+                        const gain2 = audioCtx.createGain();
+                        osc2.connect(gain2);
+                        gain2.connect(audioCtx.destination);
+                        osc2.frequency.value = 784;
+                        gain2.gain.setValueAtTime(0.1, now + 0.1);
+                        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                        osc2.start(now + 0.1);
+                        osc2.stop(now + 0.5);
+                        break;
+                    case 'flip':
+                        osc.frequency.value = 660;
+                        gain.gain.setValueAtTime(0.05, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                        osc.start();
+                        osc.stop(now + 0.1);
+                        break;
+                    case 'hint':
+                        osc.frequency.value = 1046;
+                        gain.gain.setValueAtTime(0.08, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+                        osc.start();
+                        osc.stop(now + 0.15);
+                        break;
+                }
+            }
+
+            // ==================== KONFETI ====================
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            let confettiParticles = [];
+            let animationFrame = null;
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+
+            function createConfetti(x, y, count = 30) {
+                const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#a8e6cf', '#ff8b94', '#b5e7a0', '#d4a5a5', '#9b59b6', '#3498db', '#e74c3c'];
+                
+                for (let i = 0; i < count; i++) {
+                    confettiParticles.push({
+                        x: x || canvas.width / 2,
+                        y: y || canvas.height / 3,
+                        size: Math.random() * 8 + 4,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        vx: (Math.random() - 0.5) * 8,
+                        vy: Math.random() * -5 - 2,
+                        gravity: 0.15,
+                        rotation: Math.random() * 360,
+                        rotationSpeed: (Math.random() - 0.5) * 10,
+                        alpha: 1,
+                        fade: 0.005 + Math.random() * 0.01
+                    });
+                }
+
+                if (!animationFrame) {
+                    animateConfetti();
+                }
+            }
+
+            function animateConfetti() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                let hasParticles = false;
+                
+                for (let i = confettiParticles.length - 1; i >= 0; i--) {
+                    const p = confettiParticles[i];
+                    
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += p.gravity;
+                    p.rotation += p.rotationSpeed;
+                    p.alpha -= p.fade;
+                    
+                    if (p.alpha <= 0 || p.y > canvas.height + 50) {
+                        confettiParticles.splice(i, 1);
+                        continue;
+                    }
+                    
+                    hasParticles = true;
+                    
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rotation * Math.PI / 180);
+                    ctx.globalAlpha = p.alpha;
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    ctx.restore();
+                }
+                
+                if (hasParticles) {
+                    animationFrame = requestAnimationFrame(animateConfetti);
+                } else {
+                    animationFrame = null;
+                }
+            }
+
+            function burstConfetti() {
+                createConfetti(canvas.width / 2, canvas.height / 3, 80);
+                setTimeout(() => createConfetti(canvas.width * 0.3, canvas.height * 0.4, 40), 100);
+                setTimeout(() => createConfetti(canvas.width * 0.7, canvas.height * 0.4, 40), 200);
+            }
+
+            // ==================== MÄNGU OLEK ====================
+            let gameState = {
+                currentDifficulty: null,
+                currentThemeIndex: 0,
+                currentLevel: 1,
+                cards: [],
+                flippedIndices: [],
+                matchedPairs: 0,
+                moves: 0,
+                hintsLeft: 3,
+                gameLocked: false,
+                startTime: null,
+                starThresholds: { three: 0, two: 0, one: 0 }
+            };
+
+            // Salvestatud progress
+            let savedProgress = {
+                easy: [0,0,0,0,0],
+                medium: [0,0,0,0,0],
+                hard: [0,0,0,0,0],
+                expert: [0,0,0,0,0]
+            };
+
+            // ==================== LOCALSTORAGE ====================
+            function loadProgress() {
+                try {
+                    const saved = localStorage.getItem('memoryLaneProgress');
+                    if (saved) {
+                        const parsed = JSON.parse(saved);
+                        if (parsed.easy) savedProgress = parsed;
+                    }
+                } catch(e) {}
+            }
+
+            function saveProgress() {
+                try {
+                    localStorage.setItem('memoryLaneProgress', JSON.stringify(savedProgress));
+                } catch(e) {}
+            }
+
+            function getStarsForLevel(diff, levelIndex) {
+                return savedProgress[diff][levelIndex] || 0;
+            }
+
+            function setStarsForLevel(diff, levelIndex, stars) {
+                if (stars > savedProgress[diff][levelIndex]) {
+                    savedProgress[diff][levelIndex] = stars;
+                    saveProgress();
+                }
+            }
+
+            function calculateStars(moves, totalPairs) {
+                const minMoves = totalPairs;
+                const maxMoves = totalPairs * 2.5;
+                
+                if (moves <= minMoves * 1.2) return 3;
+                if (moves <= minMoves * 1.8) return 2;
+                return 1;
+            }
+
+            // ==================== UI ELEMENDID ====================
+            const menuScreen = document.getElementById('menuScreen');
+            const levelSelect = document.getElementById('levelSelect');
+            const gameScreen = document.getElementById('gameScreen');
+            const winScreen = document.getElementById('winScreen');
+            const difficultyTitle = document.getElementById('difficultyTitle');
+            const themeGrid = document.getElementById('themeGrid');
+            const cardsContainer = document.getElementById('cardsContainer');
+            const movesDisplay = document.getElementById('movesDisplay');
+            const starDisplay = document.getElementById('starDisplay');
+            const hintsLeftSpan = document.getElementById('hintsLeft');
+            const hintBtn = document.getElementById('hintBtn');
+
+            // ==================== MÄNGU LOOGIKA ====================
+            function shuffleArray(arr) {
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                return arr;
+            }
+
+            function initGame(difficulty, themeName) {
+                const diff = DIFFICULTIES[difficulty];
+                const totalCards = diff.rows * diff.cols;
+                const pairCount = totalCards / 2;
+                
+                const icons = THEME_ICONS[themeName] || ['🎴','🃏'];
+                const selectedIcons = icons.slice(0, pairCount);
+                let cardValues = [...selectedIcons, ...selectedIcons];
+                cardValues = shuffleArray(cardValues);
+                
+                gameState.cards = cardValues.map((value, index) => ({
+                    id: index,
+                    value: value,
+                    matched: false,
+                    flipped: false
+                }));
+                
+                gameState.flippedIndices = [];
+                gameState.matchedPairs = 0;
+                gameState.moves = 0;
+                gameState.hintsLeft = 3;
+                gameState.gameLocked = false;
+                
+                updateStats();
+                renderCards();
+            }
+
+            function renderCards() {
+                const diff = DIFFICULTIES[gameState.currentDifficulty];
+                cardsContainer.style.gridTemplateColumns = `repeat(${diff.cols}, 1fr)`;
+                
+                let html = '';
+                gameState.cards.forEach((card, index) => {
+                    const flippedClass = card.flipped ? 'flipped' : '';
+                    const matchedClass = card.matched ? 'matched' : '';
+                    html += `
+                        <div class="card ${flippedClass} ${matchedClass}" data-index="${index}">
+                            <div class="card-front">${card.value}</div>
+                            <div class="card-back"></div>
+                        </div>
+                    `;
+                });
+                cardsContainer.innerHTML = html;
+            }
+
+            function updateStats() {
+                movesDisplay.textContent = gameState.moves;
+                const stars = calculateStars(gameState.moves, gameState.cards.length / 2);
+                starDisplay.textContent = stars;
+                hintsLeftSpan.textContent = gameState.hintsLeft;
+                
+                if (gameState.hintsLeft <= 0) {
+                    hintBtn.classList.add('disabled');
+                } else {
+                    hintBtn.classList.remove('disabled');
+                }
+            }
+
+            function flipCard(index) {
+                const card = gameState.cards[index];
+                if (gameState.gameLocked || card.matched || card.flipped) return false;
+                if (gameState.flippedIndices.length >= 2) return false;
+                
+                card.flipped = true;
+                gameState.flippedIndices.push(index);
+                playSound('flip');
+                
+                renderCards();
+                
+                if (gameState.flippedIndices.length === 2) {
+                    gameState.moves++;
+                    updateStats();
+                    checkMatch();
+                }
+                
+                return true;
+            }
+
+            function checkMatch() {
+                gameState.gameLocked = true;
+                const [idx1, idx2] = gameState.flippedIndices;
+                const card1 = gameState.cards[idx1];
+                const card2 = gameState.cards[idx2];
+                
+                if (card1.value === card2.value) {
+                    // Õige paar
+                    card1.matched = true;
+                    card2.matched = true;
+                    gameState.matchedPairs++;
+                    gameState.flippedIndices = [];
+                    gameState.gameLocked = false;
+                    
+                    playSound('match');
+                    createConfetti(canvas.width / 2, canvas.height / 3, 15);
+                    
+                    renderCards();
+                    
+                    // Kontrolli taseme lõppu
+                    if (gameState.matchedPairs === gameState.cards.length / 2) {
+                        levelComplete();
+                    }
+                } else {
+                    // Vale paar
+                    playSound('wrong');
+                    
+                    // Raputamisefekt
+                    const cards = document.querySelectorAll('.card');
+                    cards[idx1].classList.add('shake');
+                    cards[idx2].classList.add('shake');
+                    
+                    setTimeout(() => {
+                        card1.flipped = false;
+                        card2.flipped = false;
+                        gameState.flippedIndices = [];
+                        gameState.gameLocked = false;
+                        
+                        cards[idx1].classList.remove('shake');
+                        cards[idx2].classList.remove('shake');
+                        
+                        renderCards();
+                    }, 600);
+                }
+            }
+
+            function levelComplete() {
+                playSound('levelComplete');
+                burstConfetti();
+                
+                const diff = gameState.currentDifficulty;
+                const levelIndex = gameState.currentLevel - 1;
+                const stars = calculateStars(gameState.moves, gameState.cards.length / 2);
+                
+                setStarsForLevel(diff, levelIndex, stars);
+                
+                setTimeout(() => {
+                    if (gameState.currentLevel === 5) {
+                        // Kõik tasemed läbitud!
+                        showWinScreen();
+                    } else {
+                        // Järgmine tase
+                        gameState.currentLevel++;
+                        showLevelSelect(diff);
+                    }
+                }, 2000);
+            }
+
+            function showHint() {
+                if (gameState.hintsLeft <= 0 || gameState.gameLocked) return;
+                
+                // Leia üks sobitamata paar
+                const unmatched = gameState.cards.filter(c => !c.matched);
+                const pairs = {};
+                unmatched.forEach(card => {
+                    if (!pairs[card.value]) pairs[card.value] = [];
+                    pairs[card.value].push(card);
+                });
+                
+                for (let value in pairs) {
+                    if (pairs[value].length >= 2) {
+                        const card1 = pairs[value][0];
+                        const card2 = pairs[value][1];
+                        
+                        if (!card1.flipped && !card2.flipped) {
+                            // Näita vihjet
+                            card1.flipped = true;
+                            card2.flipped = true;
+                            gameState.hintsLeft--;
+                            playSound('hint');
+                            
+                            renderCards();
+                            updateStats();
+                            
+                            setTimeout(() => {
+                                card1.flipped = false;
+                                card2.flipped = false;
+                                renderCards();
+                            }, 800);
+                            
+                            return;
+                        }
+                    }
+                }
+            }
+
+            function showWinScreen() {
+                gameScreen.classList.add('hidden');
+                winScreen.classList.remove('hidden');
+                
+                // Arvuta kogutärnid
+                let totalStars = 0;
+                for (let diff in savedProgress) {
+                    savedProgress[diff].forEach(s => totalStars += s);
+                }
+                
+                const starStr = '⭐'.repeat(Math.min(totalStars, 15));
+                document.getElementById('finalStars').innerHTML = starStr || '⭐';
+                
+                burstConfetti();
+                setTimeout(() => burstConfetti(), 300);
+                setTimeout(() => burstConfetti(), 600);
+            }
+
+            // ==================== EKRAANIDE KUVA ====================
+            function showLevelSelect(difficulty) {
+                gameState.currentDifficulty = difficulty;
+                menuScreen.classList.add('hidden');
+                gameScreen.classList.add('hidden');
+                winScreen.classList.add('hidden');
+                levelSelect.classList.remove('hidden');
+                
+                const diffName = DIFFICULTIES[difficulty].name;
+                difficultyTitle.textContent = `${diffName} - Vali teema`;
+                
+                renderThemeGrid();
+            }
+
+            function renderThemeGrid() {
+                const diff = gameState.currentDifficulty;
+                let html = '';
+                
+                for (let i = 0; i < 5; i++) {
+                    const themeName = THEMES[i];
+                    const stars = getStarsForLevel(diff, i);
+                    const locked = i > 0 && getStarsForLevel(diff, i-1) === 0;
+                    
+                    let starsHtml = '<div class="stars-earned">';
+                    for (let s = 0; s < 3; s++) {
+                        starsHtml += `<span class="star-icon ${s < stars ? '' : 'empty'}">${s < stars ? '★' : '☆'}</span>`;
+                    }
+                    starsHtml += '</div>';
+                    
+                    html += `
+                        <div class="theme-btn ${locked ? 'locked' : ''}" data-theme="${themeName}" data-level="${i+1}">
+                            ${themeName}
+                            ${starsHtml}
+                        </div>
+                    `;
+                }
+                
+                themeGrid.innerHTML = html;
+            }
+
+            function startLevel(difficulty, theme, level) {
+                gameState.currentDifficulty = difficulty;
+                gameState.currentThemeIndex = THEMES.indexOf(theme);
+                gameState.currentLevel = level;
+                
+                levelSelect.classList.add('hidden');
+                gameScreen.classList.remove('hidden');
+                
+                initGame(difficulty, theme);
+            }
+
+            // ==================== SÜNDMUSTE KUULARID ====================
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const diff = e.currentTarget.dataset.diff;
+                    initAudio();
+                    playSound('flip');
+                    showLevelSelect(diff);
+                });
+            });
+
+            themeGrid.addEventListener('click', (e) => {
+                const btn = e.target.closest('.theme-btn');
+                if (!btn || btn.classList.contains('locked')) return;
+                
+                const theme = btn.dataset.theme;
+                const level = parseInt(btn.dataset.level);
+                
+                initAudio();
+                playSound('flip');
+                startLevel(gameState.currentDifficulty, theme, level);
+            });
+
+            cardsContainer.addEventListener('click', (e) => {
+                const card = e.target.closest('.card');
+                if (!card) return;
+                
+                const index = parseInt(card.dataset.index);
+                flipCard(index);
+            });
+
+            hintBtn.addEventListener('click', () => {
+                showHint();
+            });
+
+            document.getElementById('backToMenuBtn').addEventListener('click', () => {
+                playSound('flip');
+                levelSelect.classList.add('hidden');
+                menuScreen.classList.remove('hidden');
+            });
+
+            document.getElementById('gameBackBtn').addEventListener('click', () => {
+                playSound('flip');
+                gameScreen.classList.add('hidden');
+                menuScreen.classList.remove('hidden');
+            });
+
+            document.getElementById('playAgainBtn').addEventListener('click', () => {
+                playSound('flip');
+                winScreen.classList.add('hidden');
+                menuScreen.classList.remove('hidden');
+            });
+
+            // Puute ja hiire sündmused heli initsialiseerimiseks
+            document.body.addEventListener('touchstart', () => initAudio(), { once: true });
+            document.body.addEventListener('click', () => initAudio(), { once: true });
+
+            // Laadi salvestatud progress
+            loadProgress();
+
+            // Topeltklõpsu-zoom keelatud (CSS-is juba olemas)
+        })();
+    </script>
+</body>
+</html>
