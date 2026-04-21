@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d0521">
+<title>Memory Lane ✨</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --purple:#8B5CF6;--pink:#EC4899;--amber:#F59E0B;
+  --teal:#14B8A6;--green:#10B981;--gold:#FFD700;
+  --blue:#60A5FA;--red:#EF4444;
+  --panel:rgba(255,255,255,0.06);--border:rgba(255,255,255,0.12);
+  --text:#fff;--muted:rgba(255,255,255,0.55);
+  --radius:16px;--r-card:14px;
+}
+
+html{height:100%;-webkit-tap-highlight-color:transparent;}
+body{
+  font-family:'Nunito',sans-serif;
+  background:#0d0521;color:var(--text);
+  min-height:100%;overflow-x:hidden;
+}
+
+/* ── CANVASES ── */
+#bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+#confetti-canvas{position:fixed;inset:0;z-index:200;pointer-events:none;}
+
+/* ── SCREENS ── */
+.screen{
+  display:none;position:relative;z-index:1;
+  min-height:100vh;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:28px 16px 32px;
+}
+.screen.active{display:flex;}
+
+/* ── MENU ── */
+.logo{
+  font-family:'Fredoka One',cursive;
+  font-size:clamp(3.2rem,12vw,6rem);
+  line-height:.95;text-align:center;
+  background:linear-gradient(135deg,#FFD700 0%,#FF6B6B 40%,#a78bfa 80%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:4px;
+  filter:drop-shadow(0 0 40px rgba(139,92,246,.4));
+}
+.logo-sub{
+  font-size:1rem;color:var(--muted);text-align:center;
+  letter-spacing:3px;text-transform:uppercase;font-weight:700;
+  margin-bottom:48px;
+}
+.btn-play{
+  background:linear-gradient(135deg,#7C3AED,#EC4899);
+  color:#fff;border:none;padding:18px 52px;border-radius:60px;
+  font-family:'Fredoka One',cursive;font-size:1.5rem;cursor:pointer;
+  box-shadow:0 8px 32px rgba(124,58,237,.55);
+  transition:transform .2s,box-shadow .2s;
+  margin-bottom:14px;width:100%;max-width:280px;
+}
+.btn-play:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(124,58,237,.7);}
+.btn-play:active{transform:translateY(0);}
+.btn-ghost{
+  background:var(--panel);border:1px solid var(--border);color:var(--muted);
+  padding:12px 32px;border-radius:60px;
+  font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;
+  transition:all .2s;width:100%;max-width:280px;
+}
+.btn-ghost:hover{background:rgba(255,255,255,.12);color:#fff;}
+
+.menu-stats{
+  display:flex;gap:28px;margin-top:36px;
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px 28px;
+}
+.menu-stat{text-align:center;}
+.menu-stat-val{
+  font-family:'Fredoka One',cursive;font-size:1.8rem;
+  color:var(--gold);line-height:1;
+}
+.menu-stat-lbl{font-size:.7rem;color:var(--muted);font-weight:700;text-transform:uppercase;margin-top:2px;}
+
+/* ── SHARED SECTION TITLES ── */
+.stitle{
+  font-family:'Fredoka One',cursive;
+  font-size:clamp(1.7rem,5vw,2.4rem);
+  text-align:center;margin-bottom:6px;
+}
+.ssub{font-size:.95rem;color:var(--muted);text-align:center;margin-bottom:28px;}
+
+/* ── BACK BUTTON (top-left) ── */
+.back-btn{
+  position:absolute;top:18px;left:16px;
+  background:var(--panel);border:1px solid var(--border);
+  color:#fff;padding:8px 18px;border-radius:50px;cursor:pointer;
+  font-family:'Nunito',sans-serif;font-weight:800;font-size:.9rem;
+  transition:all .2s;display:flex;align-items:center;gap:5px;
+}
+.back-btn:hover{background:rgba(255,255,255,.14);}
+
+/* ── DIFFICULTY CARDS ── */
+.diff-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:14px;width:100%;max-width:480px;
+}
+.diff-card{
+  background:var(--panel);border:2px solid var(--border);
+  border-radius:var(--radius);padding:22px 14px 18px;
+  text-align:center;cursor:pointer;
+  transition:transform .25s,box-shadow .25s,border-color .25s;
+  position:relative;overflow:hidden;
+}
+.diff-card::before{
+  content:'';position:absolute;inset:0;
+  background:var(--glow,transparent);opacity:0;transition:opacity .25s;
+}
+.diff-card:hover{transform:translateY(-5px);}
+.diff-card:hover::before{opacity:1;}
+.diff-card:active{transform:translateY(-2px);}
+.dc-easy  {--glow:linear-gradient(135deg,rgba(16,185,129,.18),transparent);}
+.dc-easy:hover  {box-shadow:0 8px 28px rgba(16,185,129,.35);border-color:#10B981;}
+.dc-med   {--glow:linear-gradient(135deg,rgba(96,165,250,.18),transparent);}
+.dc-med:hover   {box-shadow:0 8px 28px rgba(96,165,250,.35);border-color:#60A5FA;}
+.dc-hard  {--glow:linear-gradient(135deg,rgba(245,158,11,.18),transparent);}
+.dc-hard:hover  {box-shadow:0 8px 28px rgba(245,158,11,.35);border-color:#F59E0B;}
+.dc-expert{--glow:linear-gradient(135deg,rgba(236,72,153,.18),transparent);}
+.dc-expert:hover{box-shadow:0 8px 28px rgba(236,72,153,.35);border-color:#EC4899;}
+.dc-icon{font-size:2.4rem;margin-bottom:6px;}
+.dc-name{font-family:'Fredoka One',cursive;font-size:1.25rem;margin-bottom:2px;}
+.dc-info{font-size:.75rem;color:var(--muted);}
+.dc-badge{
+  display:inline-block;padding:2px 10px;border-radius:20px;
+  font-size:.68rem;font-weight:800;margin-top:8px;
+}
+.dc-easy   .dc-badge{background:rgba(16,185,129,.18);color:#10B981;}
+.dc-med    .dc-badge{background:rgba(96,165,250,.18);color:#60A5FA;}
+.dc-hard   .dc-badge{background:rgba(245,158,11,.18);color:#F59E0B;}
+.dc-expert .dc-badge{background:rgba(236,72,153,.18);color:#EC4899;}
+.dc-progress{font-size:.7rem;color:var(--muted);margin-top:6px;}
+
+/* ── LEVEL SELECT ── */
+.lev-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
+  gap:12px;width:100%;max-width:480px;
+}
+.lev-card{
+  background:var(--panel);border:2px solid var(--border);
+  border-radius:var(--radius);padding:18px 10px 14px;
+  text-align:center;cursor:pointer;
+  transition:transform .2s,box-shadow .2s,border-color .2s;
+}
+.lev-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 8px 24px rgba(139,92,246,.4);
+  border-color:var(--purple);
+}
+.lev-card:active{transform:translateY(-1px);}
+.lev-num{
+  font-family:'Fredoka One',cursive;font-size:2rem;
+  color:var(--purple);line-height:1;margin-bottom:2px;
+}
+.lev-icon{font-size:1.6rem;margin-bottom:4px;}
+.lev-name{font-size:.7rem;color:var(--muted);font-weight:700;margin-bottom:8px;}
+.lev-stars{display:flex;justify-content:center;gap:2px;font-size:.95rem;}
+.star-on{color:var(--gold);filter:drop-shadow(0 0 3px gold);}
+.star-off{color:rgba(255,255,255,.18);}
+
+.stars-total{
+  display:flex;align-items:center;gap:8px;
+  font-family:'Fredoka One',cursive;font-size:1.1rem;
+  color:var(--gold);margin-bottom:18px;
+}
+
+/* ── GAME SCREEN ── */
+#screen-game{
+  padding:0;justify-content:flex-start;
+  height:100vh;min-height:unset;overflow:hidden;
+}
+.game-wrap{
+  width:100%;height:100vh;
+  display:flex;flex-direction:column;
+  max-width:680px;margin:0 auto;
+}
+.game-hdr{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;
+  background:rgba(13,5,33,.85);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);
+  flex-shrink:0;
+}
+.game-hdr-back{
+  background:var(--panel);border:1px solid var(--border);
+  color:#fff;width:36px;height:36px;border-radius:10px;
+  cursor:pointer;font-size:1.1rem;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .2s;
+}
+.game-hdr-back:hover{background:rgba(255,255,255,.14);}
+.game-hdr-info{flex:1;text-align:center;min-width:0;}
+.game-hdr-lbl{font-size:.6rem;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:1px;}
+.game-hdr-name{font-family:'Fredoka One',cursive;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.game-stats{display:flex;gap:14px;flex-shrink:0;}
+.gstat{text-align:center;}
+.gstat-ico{font-size:.8rem;}
+.gstat-val{font-family:'Fredoka One',cursive;font-size:1.05rem;line-height:1;}
+
+.progress-bar{height:4px;background:rgba(255,255,255,.08);flex-shrink:0;}
+.progress-fill{
+  height:100%;width:0%;
+  background:linear-gradient(90deg,#7C3AED,#EC4899);
+  transition:width .5s ease;border-radius:0 2px 2px 0;
+}
+
+.board-wrap{
+  flex:1;min-height:0;
+  padding:10px;
+  display:flex;align-items:center;justify-content:center;
+}
+.board{
+  display:grid;
+  gap:clamp(4px,1.2vw,9px);
+  width:100%;height:100%;
+}
+
+/* ── CARD ── */
+.card{cursor:pointer;perspective:700px;}
+.card-inner{
+  width:100%;height:100%;position:relative;
+  transform-style:preserve-3d;
+  transition:transform .42s cubic-bezier(.4,0,.2,1);
+  border-radius:var(--r-card);
+}
+.card.flipped .card-inner,
+.card.matched .card-inner{transform:rotateY(180deg);}
+.card-front,.card-back{
+  position:absolute;inset:0;
+  border-radius:var(--r-card);
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+.card-front{
+  background:linear-gradient(135deg,#4C1D95,#6D28D9,#7C3AED);
+  border:2px solid rgba(167,139,250,.35);
+  box-shadow:0 4px 16px rgba(76,29,149,.5),inset 0 0 30px rgba(124,58,237,.25);
+  overflow:hidden;
+}
+.card-front-deco{
+  position:absolute;inset:0;
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
+  font-size:clamp(.55rem,1.5vw,.85rem);
+  color:rgba(167,139,250,.35);
+  letter-spacing:-1px;
+  pointer-events:none;
+  user-select:none;
+  line-height:1.2;
+  padding:4px;
+}
+.card-back{
+  background:#fff;transform:rotateY(180deg);
+  border:2px solid rgba(255,255,255,.8);
+  box-shadow:0 4px 16px rgba(0,0,0,.18);
+  font-size:clamp(1.4rem,4vw,2.6rem);
+}
+.card.matched .card-back{
+  background:linear-gradient(135deg,#d1fae5,#a7f3d0);
+  border-color:#10B981;
+  box-shadow:0 0 22px rgba(16,185,129,.55);
+  animation:matchPop .4s ease;
+}
+@keyframes matchPop{
+  0%{transform:rotateY(180deg) scale(1);}
+  40%{transform:rotateY(180deg) scale(1.14);}
+  100%{transform:rotateY(180deg) scale(1);}
+}
+.card.shake .card-inner{animation:shakeCard .38s ease;}
+@keyframes shakeCard{
+  0%,100%{transform:rotateY(180deg);}
+  25%{transform:rotateY(180deg) translateX(-5px);}
+  75%{transform:rotateY(180deg) translateX(5px);}
+}
+
+/* Hint row */
+.hint-row{
+  flex-shrink:0;padding:8px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(13,5,33,.5);
+  border-top:1px solid var(--border);
+}
+.hint-btn{
+  background:rgba(245,158,11,.15);
+  border:1px solid rgba(245,158,11,.4);
+  color:#F59E0B;
+  padding:7px 16px;border-radius:50px;
+  font-family:'Nunito',sans-serif;font-weight:800;font-size:.82rem;
+  cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;
+}
+.hint-btn:hover{background:rgba(245,158,11,.28);}
+.hint-btn:disabled{opacity:.3;cursor:not-allowed;}
+.pairs-label{
+  font-family:'Fredoka One',cursive;font-size:.95rem;color:var(--muted);
+}
+.pairs-val{color:#fff;}
+
+/* ── COMPLETE SCREEN ── */
+.comp-emoji{
+  font-size:4.5rem;margin-bottom:12px;
+  animation:bounceIn .5s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes bounceIn{from{transform:scale(0);}to{transform:scale(1);}}
+.comp-title{
+  font-family:'Fredoka One',cursive;
+  font-size:clamp(2rem,6vw,3rem);margin-bottom:6px;
+  background:linear-gradient(135deg,#FFD700,#FF6B6B);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.new-rec{
+  background:linear-gradient(135deg,#FFD700,#FF6B6B);
+  color:#000;font-weight:800;font-size:.75rem;
+  padding:3px 12px;border-radius:20px;margin-bottom:8px;
+  display:none;
+}
+.new-rec.show{display:inline-block;animation:popIn .45s cubic-bezier(.34,1.56,.64,1);}
+@keyframes popIn{from{transform:scale(0);}to{transform:scale(1);}}
+.comp-stars{
+  display:flex;justify-content:center;gap:8px;
+  font-size:clamp(2rem,7vw,3.2rem);margin:12px 0;
+}
+.cstar{opacity:0;transform:scale(0) rotate(-30deg);transition:all .4s cubic-bezier(.34,1.56,.64,1);}
+.cstar.show{opacity:1;transform:scale(1) rotate(0);}
+.cstar.on{color:var(--gold);filter:drop-shadow(0 0 8px gold);}
+.cstar.off{color:rgba(255,255,255,.18);}
+.comp-stats{
+  display:flex;gap:20px;
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px 28px;margin:12px 0 22px;
+}
+.cstat{text-align:center;}
+.cstat-lbl{font-size:.68rem;color:var(--muted);font-weight:800;text-transform:uppercase;}
+.cstat-val{font-family:'Fredoka One',cursive;font-size:1.5rem;}
+.comp-btns{display:flex;flex-direction:column;gap:10px;width:100%;max-width:280px;}
+.btn{
+  border:none;cursor:pointer;border-radius:50px;
+  font-family:'Fredoka One',cursive;font-size:1.05rem;
+  padding:14px 28px;transition:all .2s;width:100%;
+}
+.btn-main{background:linear-gradient(135deg,#7C3AED,#EC4899);color:#fff;box-shadow:0 4px 20px rgba(124,58,237,.4);}
+.btn-main:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(124,58,237,.6);}
+.btn-sec{background:var(--panel);border:1px solid var(--border);color:#fff;}
+.btn-sec:hover{background:rgba(255,255,255,.14);}
+
+/* ── VICTORY SCREEN ── */
+.victory-ring{
+  font-size:3rem;text-align:center;margin-bottom:12px;
+  animation:rock 1.8s ease-in-out infinite;
+}
+@keyframes rock{0%,100%{transform:rotate(-6deg);}50%{transform:rotate(6deg);}}
+.victory-title{
+  font-family:'Fredoka One',cursive;
+  font-size:clamp(2.8rem,9vw,4.5rem);
+  text-align:center;
+  background:linear-gradient(135deg,#FFD700,#FF6B6B,#a78bfa);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:4px;
+}
+
+/* ── HOW TO PLAY MODAL ── */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,.82);
+  z-index:150;display:none;align-items:center;justify-content:center;
+  padding:20px;backdrop-filter:blur(6px);
+}
+.modal-bg.open{display:flex;}
+.modal{
+  background:#130828;border:1px solid var(--border);
+  border-radius:20px;padding:28px 22px;
+  max-width:400px;width:100%;position:relative;
+  animation:slideUp .35s ease;
+}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal-title{
+  font-family:'Fredoka One',cursive;font-size:1.7rem;
+  text-align:center;margin-bottom:20px;
+}
+.modal-step{display:flex;gap:12px;margin-bottom:14px;align-items:flex-start;}
+.mstep-num{
+  width:26px;height:26px;flex-shrink:0;
+  background:linear-gradient(135deg,#7C3AED,#EC4899);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:.8rem;
+}
+.mstep-txt{font-size:.9rem;color:rgba(255,255,255,.85);line-height:1.5;}
+.modal-close{
+  position:absolute;top:14px;right:14px;
+  background:var(--panel);border:1px solid var(--border);
+  color:#fff;width:30px;height:30px;border-radius:50%;
+  cursor:pointer;font-size:.9rem;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:420px){
+  .diff-grid{gap:10px;}
+  .lev-grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;}
+  .comp-stats{padding:12px 18px;gap:14px;}
+  .menu-stats{padding:14px 18px;gap:18px;}
+}
+@media(min-width:600px){
+  .card-back{font-size:clamp(2rem,4.5vw,3rem);}
+}
+
+/* ── TRANSITIONS ── */
+.screen.active{animation:fadeUp .35s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+<canvas id="confetti-canvas"></canvas>
+
+<!-- HOW TO PLAY MODAL -->
+<div class="modal-bg" id="modal-howto">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">Kuidas mängida? 🎮</div>
+    <div class="modal-step">
+      <div class="mstep-num">1</div>
+      <div class="mstep-txt">Vali raskusaste — <b>Kerge</b> algajatele kuni <b>Ekspert</b> meistritele!</div>
+    </div>
+    <div class="modal-step">
+      <div class="mstep-num">2</div>
+      <div class="mstep-txt">Klõpsa kaardil et see ümber pöörata ja pilt näha.</div>
+    </div>
+    <div class="modal-step">
+      <div class="mstep-num">3</div>
+      <div class="mstep-txt">Pööra teine kaart — kui mõlemad pildid on samad, said paari! 🎉</div>
+    </div>
+    <div class="modal-step">
+      <div class="mstep-num">4</div>
+      <div class="mstep-txt">Leia kõik paarid <b>võimalikult väheste käikudega</b> — rohkem tähti! ⭐⭐⭐</div>
+    </div>
+    <div class="modal-step">
+      <div class="mstep-num">5</div>
+      <div class="mstep-txt">Kasuta <b>💡 Vihjet</b> kui jääd hätta — sul on 3 vihjet taseme kohta.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MENU ══ -->
+<div class="screen active" id="screen-menu">
+  <div class="logo">Memory<br>Lane</div>
+  <div class="logo-sub">✦ leia kõik paarid ✦</div>
+  <button class="btn-play" onclick="nav('difficulty')">🎮 Mängi</button>
+  <button class="btn-ghost" onclick="openModal()">❓ Kuidas mängida</button>
+  <div class="menu-stats">
+    <div class="menu-stat">
+      <div class="menu-stat-val" id="ms-stars">0</div>
+      <div class="menu-stat-lbl">⭐ Tähte</div>
+    </div>
+    <div class="menu-stat">
+      <div class="menu-stat-val" id="ms-levels">0</div>
+      <div class="menu-stat-lbl">🏆 Taset</div>
+    </div>
+    <div class="menu-stat">
+      <div class="menu-stat-val" id="ms-perfect">0</div>
+      <div class="menu-stat-lbl">💎 Täiuslik</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DIFFICULTY ══ -->
+<div class="screen" id="screen-difficulty">
+  <button class="back-btn" onclick="nav('menu')">← Tagasi</button>
+  <div class="stitle">Vali raskusaste 🎯</div>
+  <div class="ssub">Mida raskem, seda rohkem kaarte!</div>
+  <div class="diff-grid">
+    <div class="diff-card dc-easy" onclick="pickDiff('easy')">
+      <div class="dc-icon">🌱</div>
+      <div class="dc-name">Kerge</div>
+      <div class="dc-info">6 paari · 3×4</div>
+      <div class="dc-badge">ALGAJA</div>
+      <div class="dc-progress" id="dp-easy">⭐ 0 / 15</div>
+    </div>
+    <div class="diff-card dc-med" onclick="pickDiff('medium')">
+      <div class="dc-icon">🌿</div>
+      <div class="dc-name">Keskmine</div>
+      <div class="dc-info">8 paari · 4×4</div>
+      <div class="dc-badge">MÄNGIJA</div>
+      <div class="dc-progress" id="dp-medium">⭐ 0 / 15</div>
+    </div>
+    <div class="diff-card dc-hard" onclick="pickDiff('hard')">
+      <div class="dc-icon">🔥</div>
+      <div class="dc-name">Raske</div>
+      <div class="dc-info">10 paari · 4×5</div>
+      <div class="dc-badge">MEISTER</div>
+      <div class="dc-progress" id="dp-hard">⭐ 0 / 15</div>
+    </div>
+    <div class="diff-card dc-expert" onclick="pickDiff('expert')">
+      <div class="dc-icon">💎</div>
+      <div class="dc-name">Ekspert</div>
+      <div class="dc-info">15 paari · 5×6</div>
+      <div class="dc-badge">LEGEND</div>
+      <div class="dc-progress" id="dp-expert">⭐ 0 / 15</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ LEVEL SELECT ══ -->
+<div class="screen" id="screen-levels">
+  <button class="back-btn" onclick="nav('difficulty')">← Tagasi</button>
+  <div class="stitle" id="lev-title">Vali tase</div>
+  <div class="stars-total"><span>⭐</span><span id="lev-stars-txt">0 / 15 tähte</span></div>
+  <div class="lev-grid" id="lev-grid"></div>
+</div>
+
+<!-- ══ GAME ══ -->
+<div class="screen" id="screen-game">
+  <div class="game-wrap">
+    <div class="game-hdr">
+      <button class="game-hdr-back" onclick="confirmQuit()">←</button>
+      <div class="game-hdr-info">
+        <div class="game-hdr-lbl" id="g-lbl">TASE 1</div>
+        <div class="game-hdr-name" id="g-name">Loomad 🐾</div>
+      </div>
+      <div class="game-stats">
+        <div class="gstat">
+          <div class="gstat-ico">⏱️</div>
+          <div class="gstat-val" id="g-time">0:00</div>
+        </div>
+        <div class="gstat">
+          <div class="gstat-ico">🎯</div>
+          <div class="gstat-val" id="g-moves">0</div>
+        </div>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="g-prog"></div></div>
+    <div class="board-wrap">
+      <div class="board" id="game-board"></div>
+    </div>
+    <div class="hint-row">
+      <div class="pairs-label">Paarid: <span class="pairs-val" id="g-pairs">0/0</span></div>
+      <button class
