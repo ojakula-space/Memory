@@ -1,0 +1,118 @@
+{
+  "name": "Memory Lane - Mälumäng",
+  "short_name": "Memory Lane",
+  "description": "Professionaalne mälumäng 20 tasemega. Arenda mälu mängides! Perekond Ojaküla",
+  "categories": ["games", "education", "entertainment"],
+  "theme_color": "#1b2735",
+  "background_color": "#0a0a2a",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/Memory/",
+  "start_url": "/Memory/",
+  "id": "memory-lane-v2",
+  "lang": "et-EE",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "/Memory/assets/icons/icon-48.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/Memory/assets/icons/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/Memory/assets/icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/Memory/assets/icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/Memory/assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/Memory/assets/icons/icon-256.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/Memory/assets/icons/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/Memory/assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/Memory/assets/images/screenshot-1.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "platform": "wide",
+      "label": "Memory Lane mängu peamenüü"
+    },
+    {
+      "src": "/Memory/assets/images/screenshot-2.jpg",
+      "sizes": "750x1334",
+      "type": "image/jpeg",
+      "platform": "narrow",
+      "label": "Mängimine mobiilis"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Alusta mängu",
+      "short_name": "Mängi",
+      "description": "Mine otse mängu juurde",
+      "url": "/Memory/#easy",
+      "icons": [
+        {
+          "src": "/Memory/assets/icons/play-icon.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Ekspert tase",
+      "short_name": "Ekspert",
+      "description": "Mine otse ekspert raskusastmesse",
+      "url": "/Memory/#expert",
+      "icons": [
+        {
+          "src": "/Memory/assets/icons/expert-icon.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "iarc_rating_id": "e58c174a-81d2-5c3c-82a9-1b2c2c2c2c2c",
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "display_override": ["standalone", "minimal-ui", "window-controls-overlay"]
+}
