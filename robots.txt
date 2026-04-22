@@ -1,0 +1,96 @@
+# ==================== MEMORY LANE - ROBOTS.TXT ====================
+# Autor: Perekond Ojaküla
+# Viimati uuendatud: 2026-04-22
+# ===================================================================
+
+# === ÜLDISED REEGLID KÕIGILE ROBOTITELE ===
+User-agent: *
+Allow: /Memory/
+Allow: /Memory/index.html
+Allow: /Memory/assets/
+Allow: /Memory/manifest.json
+Allow: /Memory/sitemap.xml
+
+# === AVASTA KEELATUD ALAD ===
+Disallow: /Memory/private/
+Disallow: /Memory/tmp/
+Disallow: /Memory/backup/
+Disallow: /Memory/.git/
+Disallow: /Memory/.github/
+Disallow: /Memory/node_modules/
+Disallow: /Memory/*.log
+Disallow: /Memory/*.tmp
+Disallow: /Memory/.env
+
+# === SITEMAP ASUKOHT ===
+Sitemap: https://ojakula-space.github.io/Memory/sitemap.xml
+
+# === SPETSIIFILISED REEGLID ===
+
+# Googlebot
+User-agent: Googlebot
+Allow: /Memory/
+Allow: /Memory/*.js
+Allow: /Memory/*.css
+Allow: /Memory/*.json
+Allow: /Memory/*.xml
+Crawl-delay: 1
+
+# Googlebot-Image (pildiotsing)
+User-agent: Googlebot-Image
+Allow: /Memory/assets/images/
+Allow: /Memory/assets/icons/
+Crawl-delay: 2
+
+# Bingbot
+User-agent: Bingbot
+Allow: /Memory/
+Crawl-delay: 2
+
+# Yandex
+User-agent: Yandex
+Allow: /Memory/
+Crawl-delay: 2
+Clean-param: utm_source /Memory/
+
+# Baiduspider (Hiina)
+User-agent: Baiduspider
+Allow: /Memory/
+Crawl-delay: 3
+
+# DuckDuckBot
+User-agent: DuckDuckBot
+Allow: /Memory/
+Crawl-delay: 2
+
+# AhrefsBot (SEO tööriist)
+User-agent: AhrefsBot
+Allow: /Memory/
+Crawl-delay: 5
+
+# SemrushBot
+User-agent: SemrushBot
+Allow: /Memory/
+Crawl-delay: 5
+
+# === BLOKEERI HALVAD ROBOTID ===
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+User-agent: MauiBot
+Disallow: /
+
+User-agent: AspiegelBot
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+# === HOST (Peamine domeen) ===
+Host: ojakula-space.github.io
